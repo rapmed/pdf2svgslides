@@ -1,0 +1,36 @@
+name: check
+
+on:
+  workflow_call:
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v21
+
+      - name: Run the Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v6
+
+      - name: Setup flake environment
+        run: nix develop -c sleep 0
+        shell: bash
+
+      - name: Check formatting
+        run: nix develop -c cargo fmt --check
+
+      - name: Clippy
+        run: nix develop -c cargo clippy
+
+      - name: Build
+        run: nix develop -c cargo build
