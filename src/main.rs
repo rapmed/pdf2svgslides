@@ -88,7 +88,7 @@ fn render_thumbnail(page: &poppler::Page, page_number: i32, width: f64, height: 
         for i in (0..thumbnail_data.len()).step_by(4) {
             rgb_data[j] = thumbnail_data[i + 2];
             rgb_data[j + 1] = thumbnail_data[i + 1];
-            rgb_data[j + 2] = thumbnail_data[i + 0];
+            rgb_data[j + 2] = thumbnail_data[i];
             j += 3;
         }
 
