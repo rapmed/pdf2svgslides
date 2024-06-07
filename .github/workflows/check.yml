@@ -33,4 +33,4 @@ jobs:
         run: nix develop -c cargo clippy
 
       - name: Build
-        run: nix develop -c cargo build
+        run: nix build
