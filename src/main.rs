@@ -3,13 +3,17 @@
 use anyhow::{bail, Context, Result};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().collect();
+    let mut args = std::env::args();
+    let arg0 = args.next().unwrap();
 
-    if args.len() != 2 {
-        bail!("Usage: {} file.pdf\n\nExtract pages of a PDF as SVG files, and generates a thumbnail for each.", args[0]);
-    }
+    let Some(input_path) = args.next() else {
+        bail!("Usage: {} file.pdf [output_dir]\n\nExtract pages of a PDF as SVG files, and generates a thumbnail for each.", arg0);
+    };
 
-    let doc = poppler::Document::from_file(&format!("file://{}", &args[1]), None)
+    let out_dir_arg = args.next();
+    let out_dir = std::path::Path::new(out_dir_arg.as_deref().unwrap_or("."));
+
+    let doc = poppler::Document::from_file(&format!("file://{}", &input_path), None)
         .context("error opening PDF file")?;
 
     let page_count = doc.n_pages();
@@ -32,17 +36,23 @@ fn main() -> Result<()> {
         let width = page_rect.x2() - page_rect.x1();
         let height = page_rect.y2() - page_rect.y1();
 
-        render_page(&page, page_number, width, height)
+        render_page(&page, page_number, width, height, out_dir)
             .with_context(|| format!("error rendering page {}", page_number))?;
-        render_thumbnail(&page, page_number, width, height)
+        render_thumbnail(&page, page_number, width, height, out_dir)
             .with_context(|| format!("error rendering thumbnail for page {}", page_number))?;
     }
 
     Ok(())
 }
 
-fn render_page(page: &poppler::Page, page_number: i32, width: f64, height: f64) -> Result<()> {
-    let svg_filename = format!("{:03}.svg", page_number);
+fn render_page(
+    page: &poppler::Page,
+    page_number: i32,
+    width: f64,
+    height: f64,
+    out_dir: &std::path::Path,
+) -> Result<()> {
+    let svg_filename = out_dir.join(format!("{:03}.svg", page_number));
 
     let surface = cairo::SvgSurface::new(width, height, Some(&svg_filename))
         .context("error creating SVG surface")?;
@@ -55,7 +65,13 @@ fn render_page(page: &poppler::Page, page_number: i32, width: f64, height: f64) 
     Ok(())
 }
 
-fn render_thumbnail(page: &poppler::Page, page_number: i32, width: f64, height: f64) -> Result<()> {
+fn render_thumbnail(
+    page: &poppler::Page,
+    page_number: i32,
+    width: f64,
+    height: f64,
+    out_dir: &std::path::Path,
+) -> Result<()> {
     let (width, height) = (
         check_dimension(width).context("invalid width")?,
         check_dimension(height).context("invalid height")?,
@@ -96,7 +112,7 @@ fn render_thumbnail(page: &poppler::Page, page_number: i32, width: f64, height: 
             .unwrap()
     };
 
-    let thumbnail_filename = format!("{:03}.jpg", page_number);
+    let thumbnail_filename = out_dir.join(format!("{:03}.jpg", page_number));
     buffer
         .save_with_format(&thumbnail_filename, image::ImageFormat::Jpeg)
         .context("error saving thumbnail")?;
