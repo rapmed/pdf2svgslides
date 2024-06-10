@@ -20,7 +20,7 @@ jobs:
         uses: cachix/install-nix-action@V27
 
       - name: Run the Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v6
+        uses: DeterminateSystems/magic-nix-cache-action@v7
 
       - name: Setup flake environment
         run: nix develop -c sleep 0
