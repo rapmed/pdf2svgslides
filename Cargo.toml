@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.86"
 cairo-rs = { version = "0.19.4", features = ["v1_16", "svg"] }
+gio = "0.20.0"
 image = { version = "0.25.1", default_features = false, features = ["jpeg"] }
 poppler-rs = "0.23.0"

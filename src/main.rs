@@ -1,6 +1,7 @@
 // Copyright (C) 2024 Adrien Bustany <adrien@bustany.org>
 
 use anyhow::{bail, Context, Result};
+use gio::prelude::FileExt;
 
 fn main() -> Result<()> {
     let mut args = std::env::args();
@@ -13,8 +14,9 @@ fn main() -> Result<()> {
     let out_dir_arg = args.next();
     let out_dir = std::path::Path::new(out_dir_arg.as_deref().unwrap_or("."));
 
-    let doc = poppler::Document::from_file(&format!("file://{}", &input_path), None)
-        .context("error opening PDF file")?;
+    let input_file = gio::File::for_commandline_arg(input_path);
+    let doc =
+        poppler::Document::from_file(&input_file.uri(), None).context("error opening PDF file")?;
 
     let page_count = doc.n_pages();
 
