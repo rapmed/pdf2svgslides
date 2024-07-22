@@ -9,5 +9,5 @@ edition = "2021"
 anyhow = "1.0.86"
 cairo-rs = { version = "0.20.0", features = ["v1_16", "svg"] }
 gio = "0.20.0"
-image = { version = "0.25.1", default_features = false, features = ["jpeg"] }
+image = { version = "0.25.2", default_features = false, features = ["jpeg"] }
 poppler-rs = "0.24.1"
