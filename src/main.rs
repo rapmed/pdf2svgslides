@@ -8,11 +8,17 @@ fn main() -> Result<()> {
     let arg0 = args.next().unwrap();
 
     let Some(input_path) = args.next() else {
-        bail!("Usage: {} file.pdf [output_dir]\n\nExtract pages of a PDF as SVG files, and generates a thumbnail for each.", arg0);
+        bail!("Usage: {} file.pdf [output_dir] [selected_pages]\n\nExtract pages of a PDF as SVG files, and generates a thumbnail for each.", arg0);
     };
 
     let out_dir_arg = args.next();
     let out_dir = std::path::Path::new(out_dir_arg.as_deref().unwrap_or("."));
+
+    let selected_pages = args.next().map(|s| {
+        s.split_whitespace()
+            .filter_map(|num| num.parse::<i32>().ok())
+            .collect::<Vec<i32>>()
+    });
 
     let input_file = gio::File::for_commandline_arg(input_path);
     let doc =
@@ -26,6 +32,13 @@ fn main() -> Result<()> {
 
     for i in 0..page_count {
         let page_number = 1 + i;
+
+        if let Some(pages) = &selected_pages {
+            if !pages.contains(&page_number) {
+                continue;
+            }
+        }
+
         let page = doc
             .page(i)
             .with_context(|| format!("error accessing page {}", page_number))?;
