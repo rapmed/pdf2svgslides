@@ -3,18 +3,62 @@
 use anyhow::{bail, Context, Result};
 use gio::prelude::FileExt;
 
+fn usage(arg0: &str) -> String {
+    format!(
+        concat!(
+            "Usage: {} [OPTIONS] file.pdf [output_dir]\n\n",
+            "Extracts pages of a PDF as SVG files, and generates a thumbnail for each.\n\n",
+            "Options:\n",
+            "  --help        : Displays this message and exits\n",
+            "  --pages PAGES : Only extract specific pages from the PDF document\n",
+            "                  PAGES is a comma separated list of page numbers, where the\n",
+            "                  number of the first page is 1."
+        ),
+        arg0
+    )
+}
+
+struct Args {
+    input_filename: String,
+    output_dir: Option<String>,
+    page_numbers: Option<Vec<u32>>,
+}
+
+fn parse_args() -> Result<Args> {
+    let mut pargs = pico_args::Arguments::from_env();
+
+    if pargs.contains("--help") {
+        let arg0 = std::env::args().next().unwrap();
+        println!("{}", usage(&arg0));
+        std::process::exit(0);
+    }
+
+    let page_numbers: Option<Vec<u32>> = pargs
+        .opt_value_from_fn("--pages", |val| val.split(',').map(|x| x.parse()).collect())
+        .context("error parsing page numbers")?;
+    let input_filename: String = pargs
+        .free_from_str()
+        .context("error parsing input filename")?;
+    let output_dir = pargs
+        .opt_free_from_str()
+        .context("error parsing output directory")?;
+
+    Ok(Args {
+        input_filename,
+        output_dir,
+        page_numbers,
+    })
+}
+
 fn main() -> Result<()> {
-    let mut args = std::env::args();
-    let arg0 = args.next().unwrap();
+    let Args {
+        input_filename,
+        output_dir,
+        page_numbers,
+    } = parse_args()?;
 
-    let Some(input_path) = args.next() else {
-        bail!("Usage: {} file.pdf [output_dir]\n\nExtract pages of a PDF as SVG files, and generates a thumbnail for each.", arg0);
-    };
-
-    let out_dir_arg = args.next();
-    let out_dir = std::path::Path::new(out_dir_arg.as_deref().unwrap_or("."));
-
-    let input_file = gio::File::for_commandline_arg(input_path);
+    let out_dir = std::path::Path::new(output_dir.as_deref().unwrap_or("."));
+    let input_file = gio::File::for_commandline_arg(input_filename);
     let doc =
         poppler::Document::from_file(&input_file.uri(), None).context("error opening PDF file")?;
 
@@ -24,7 +68,17 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    for i in 0..page_count {
+    let pages: Box<dyn Iterator<Item = i32>> = if let Some(numbers) = page_numbers {
+        Box::new(numbers.into_iter().map(|number| (number as i32) - 1))
+    } else {
+        Box::new(0..page_count)
+    };
+
+    for i in pages {
+        if i < 0 || i >= page_count {
+            bail!("invalid page number: {}", i);
+        }
+
         let page_number = 1 + i;
         let page = doc
             .page(i)
