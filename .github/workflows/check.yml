@@ -17,10 +17,10 @@ jobs:
           fetch-depth: 0
 
       - name: Install Nix
-        uses: cachix/install-nix-action@V27
+        uses: cachix/install-nix-action@v31.1.0
 
       - name: Run the Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v7
+        uses: DeterminateSystems/magic-nix-cache-action@v9
 
       - name: Setup flake environment
         run: nix develop -c sleep 0
