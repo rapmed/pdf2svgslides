@@ -44,6 +44,7 @@
           version = rev;
           src = pkgs.lib.cleanSource self;
           cargoLock = { lockFile = ./Cargo.lock; };
+          strictDeps = true;
 
           nativeBuildInputs = pkgNativeBuildInputs;
           buildInputs = pkgBuildInputs;
