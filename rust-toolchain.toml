@@ -1,3 +1,5 @@
 [toolchain]
-channel = "stable"
-profile = "default"
+channel = "1.85.1"
+profile = "minimal"
+# See https://rust-lang.github.io/rustup/concepts/components.html
+components = ["rustc", "cargo", "rustfmt", "rust-std", "rust-analyzer", "clippy", "rust-src"]
