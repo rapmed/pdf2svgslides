@@ -49,6 +49,9 @@
           nativeBuildInputs = pkgNativeBuildInputs;
           buildInputs = pkgBuildInputs;
 
+          # Avoid /nix/store paths in the binary, so that they don't get mixed up with dependencies
+          RUSTFLAGS = "--remap-path-prefix ${rust-version}=/rust";
+
           meta = with lib; {
             description = "Splits PDF pages into SVG files, and generates a JPEG thumbnail for each.";
             homepage = "https://github.com/abustany/pdf2svgslides";
