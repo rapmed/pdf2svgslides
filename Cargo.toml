@@ -11,4 +11,4 @@ cairo-rs = { version = "0.20.7", features = ["v1_16", "svg"] }
 gio = "0.20.9"
 image = { version = "0.25.6", default_features = false, features = ["jpeg"] }
 pico-args = "0.5.0"
-poppler-rs = "0.24.1"
+poppler-rs = "0.25.0"
