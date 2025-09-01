@@ -115,6 +115,8 @@ fn render_page(
     surface.restrict(cairo::SvgVersion::_1_2);
     surface.set_fallback_resolution(150., 150.);
     let ctx = cairo::Context::new(&surface).context("error creating Cairo context")?;
+    ctx.set_source_rgb(1.0, 1.0, 1.0);
+    ctx.paint().context("error painting background")?;
     page.render_for_printing(&ctx);
     ctx.status().context("error rendering page")?;
 
@@ -145,6 +147,8 @@ fn render_thumbnail(
     {
         let ctx = cairo::Context::new(&surface).context("error creating Cairo context")?;
         ctx.scale(ratio, ratio);
+        ctx.set_source_rgb(1.0, 1.0, 1.0);
+        ctx.paint().context("error painting background")?;
         page.render_for_printing(&ctx);
         ctx.status().context("error rendering page thumbnail")?;
     } // drop context here so that we can access the surface afterwards
