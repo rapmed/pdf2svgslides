@@ -83,14 +83,7 @@ fn main() -> Result<()> {
         let page = doc
             .page(i)
             .with_context(|| format!("error accessing page {}", page_number))?;
-        let mut page_rect = poppler::Rectangle::new();
-
-        if !page.get_bounding_box(&mut page_rect) {
-            bail!("error getting bounding box for page {}", page_number);
-        }
-
-        let width = page_rect.x2() - page_rect.x1();
-        let height = page_rect.y2() - page_rect.y1();
+        let (width, height) = page.size();
 
         render_page(&page, page_number, width, height, out_dir)
             .with_context(|| format!("error rendering page {}", page_number))?;
