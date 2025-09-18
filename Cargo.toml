@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.99"
 cairo-rs = { version = "0.21.1", features = ["v1_16", "svg"] }
-gio = "0.21.1"
+gio = "0.21.2"
 image = { version = "0.25.8", default-features = false, features = ["jpeg"] }
 pico-args = "0.5.0"
 poppler-rs = "0.25.0"
