@@ -15,7 +15,25 @@
   outputs = { self, nixpkgs, flake-utils, rust-overlay, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        overlays = [(import rust-overlay)];
+        # poppler 26.06.0 crashes on macOS when rendering a page:
+        # https://gitlab.freedesktop.org/poppler/poppler/-/work_items/1743
+        # Fixed in 26.07.0. Remove this overlay once nixpkgs ships a fixed version.
+        popplerOverlay = final: prev:
+          let
+            version = "26.08.0";
+          in {
+            poppler =
+              if !(prev.lib.versionOlder prev.poppler.version version)
+              then throw "nixpkgs ships poppler ${prev.poppler.version}, which is >= ${version}: remove popplerOverlay from flake.nix"
+              else prev.poppler.overrideAttrs (old: {
+                inherit version;
+                src = prev.fetchurl {
+                  url = "https://poppler.freedesktop.org/poppler-${version}.tar.xz";
+                  hash = "sha256-3JBuaM6mmBCXBqxqo9LJ1FEvz8rELZC4r82khtG5q9A=";
+                };
+              });
+          };
+        overlays = [(import rust-overlay) popplerOverlay];
         pkgs = import nixpkgs {
           inherit system overlays;
         };
