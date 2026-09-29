@@ -20,6 +20,10 @@
           inherit system overlays;
         };
         rust-version = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+        rustPlatform = pkgs.makeRustPlatform {
+          cargo = rust-version;
+          rustc = rust-version;
+        };
         rev = if (self ? shortRev) then self.shortRev else "dev";
 
         pkgNativeBuildInputs = [
@@ -39,7 +43,7 @@
           buildInputs = pkgBuildInputs;
         };
 
-        packages.default = pkgs.rustPlatform.buildRustPackage rec {
+        packages.default = rustPlatform.buildRustPackage rec {
           pname = "pdf2svgslides";
           version = rev;
           src = pkgs.lib.cleanSource self;
