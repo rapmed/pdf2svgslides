@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.100"
-cairo-rs = { version = "0.21.5", features = ["v1_16", "svg"] }
-gio = "0.21.5"
-image = { version = "0.25.9", default-features = false, features = ["jpeg"] }
+anyhow = "1.0.104"
+cairo-rs = { version = "0.22.9", features = ["v1_16", "svg"] }
+gio = "0.22.10"
+image = { version = "0.25.10", default-features = false, features = ["jpeg"] }
 pico-args = "0.5.0"
-poppler-rs = "0.25.0"
+poppler-rs = "0.26.0"
